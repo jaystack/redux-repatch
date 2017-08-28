@@ -1,0 +1,71 @@
+{
+  "name": "redux-repatch",
+  "version": "0.0.1",
+  "description": "Redux enhancer for dispatching reducers",
+  "main": "lib/index",
+  "browser": "dist/redux-repatch.js",
+  "typings": "lib/index",
+  "scripts": {
+    "build": "npm run build:node && npm run build:umd",
+    "build:node": "rimraf lib && tsc",
+    "build:umd": "rimraf dist && rollup -c rollup.config.js && rollup -c rollup.config.prod.js",
+    "build:w": "tsc -w",
+    "test": "jest",
+    "publish": "npm run build && npm publish"
+  },
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaystack/redux-repatch.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaystack/redux-repatch/issues"
+  },
+  "keywords": [
+    "redux",
+    "enhancer",
+    "dispatch",
+    "reducer",
+    "state",
+    "predictable",
+    "functional",
+    "immutable",
+    "flux"
+  ],
+  "authors": [
+    "Péter Hauszknecht <peter.hauszknecht@jaystack.com> (https://github.com/jayhasyee)"
+  ],
+  "jest": {
+    "globals": {
+      "ts-test": {
+        "tsConfigFile": "tsconfig.json"
+      }
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts)$": "./node_modules/ts-jest/preprocessor.js"
+    },
+    "testMatch": [
+      "**/test/**/*.spec.(ts|js)"
+    ],
+    "testEnvironment": "node"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^7.0.5",
+    "jest": "^20.0.4",
+    "rimraf": "^2.6.1",
+    "rollup": "^0.48.2",
+    "rollup-plugin-typescript2": "^0.5.2",
+    "rollup-plugin-uglify": "^2.0.1",
+    "ts-jest": "^20.0.10",
+    "typescript": "^2.2.0"
+  }
+}

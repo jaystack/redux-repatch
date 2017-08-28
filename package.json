@@ -12,7 +12,7 @@
     "build:w": "tsc -w",
     "test": "jest",
     "test:w": "jest --watch",
-    "publish": "npm run build && npm publish"
+    "pub": "npm run build && npm publish"
   },
   "files": [
     "lib",

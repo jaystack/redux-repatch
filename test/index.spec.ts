@@ -1,18 +1,14 @@
 import 'jest';
 import * as assert from 'assert';
 import { createStore, applyMiddleware, compose, Middleware } from 'redux';
-import { REDUCER, createAction, repatch } from '../src';
+import { REPATCH, createAction, repatch } from '../src';
 
 describe('redux-repatch', () => {
   describe('createAction', () => {
-    it('throws if reducer is not a function', () => {
-      assert.throws(() => createAction(undefined));
-    });
-
     it('returns a repatch action', () => {
       const reducer = _ => _;
       const action = createAction(reducer);
-      assert.strictEqual(action.type, REDUCER);
+      assert.strictEqual(action.type, REPATCH);
       assert.strictEqual(action.reducer, reducer);
     });
   });
@@ -25,13 +21,13 @@ describe('redux-repatch', () => {
 
     describe('without other enhancers', () => {
       it('runs the repatch action', () => {
-        const store = createStore(baseReducer, repatch);
+        const store = createStore(baseReducer, repatch as any);
         store.dispatch(increment());
         assert.strictEqual(store.getState(), 6);
       });
 
       it('runs the redux action', () => {
-        const store = createStore(baseReducer, repatch);
+        const store = createStore(baseReducer, repatch as any);
         store.dispatch(zero());
         assert.strictEqual(store.getState(), 0);
       });

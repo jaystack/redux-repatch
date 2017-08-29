@@ -1,15 +1,19 @@
-import { StoreEnhancer, Reducer, AnyAction, StoreCreator, GenericStoreEnhancer, Store } from 'redux';
+import { StoreEnhancer, Reducer, AnyAction, StoreCreator, applyMiddleware, Middleware } from 'redux';
 import { Reducer as RepatchReducer } from 'repatch';
 
-export const REDUCER = '@@repatch/REDUCER';
+export const REPATCH = '@@repatch/NEXT_STATE';
 
-const extendReducer = <S>(reducer: Reducer<S>): Reducer<S> => (state: S, action: AnyAction) =>
-  action.type === REDUCER ? action.reducer(state) : reducer(state, action);
-
-export const repatch: GenericStoreEnhancer = createStore => (reducer, preloadedState) =>
-  createStore(extendReducer(reducer), preloadedState);
-
-export const createAction = <S = any>(reducer: RepatchReducer<S>): AnyAction => {
-  if (typeof reducer !== 'function') throw new Error('Reducer is not a function');
-  return { type: REDUCER, reducer };
+export const middleware: Middleware = store => next => action => {
+  if (typeof action !== 'function') return next(action);
+  const result = action(store.getState());
+  return typeof result === 'function' ? next(result) : next({ type: REPATCH, nextState: result });
 };
+
+export const extendReducer = <S>(reducer: Reducer<S>): Reducer<S> => (state: S, action: AnyAction) =>
+  action.type === REPATCH ? action.nextState : reducer(state, action);
+
+export const extendEnhancer = enhancer =>
+  enhancer ? enhancer(applyMiddleware(middleware)) : applyMiddleware(middleware);
+
+export const repatch = createStore => (reducer, preloadedState, enhancer) =>
+  createStore(extendReducer(reducer), preloadedState, extendEnhancer(enhancer));

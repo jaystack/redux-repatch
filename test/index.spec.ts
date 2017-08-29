@@ -2,7 +2,7 @@ import 'jest';
 import * as assert from 'assert';
 import { createStore, applyMiddleware, compose, Middleware } from 'redux';
 import thunk from 'redux-thunk';
-import repatch, { middleware } from '../src';
+import repatch from '../src';
 
 describe('redux-repatch', () => {
   const ZERO = 'ZERO';

@@ -9,7 +9,7 @@ declare module 'redux' {
 
 const OVERRIDE = '@@repatch/OVERRIDE';
 
-export const middleware: Middleware = store => next => action => {
+const middleware: Middleware = store => next => action => {
   if (typeof action !== 'function') return next(action);
   const result = action(store.getState());
   return typeof result === 'function' ? next(result) : next({ type: OVERRIDE, state: result });

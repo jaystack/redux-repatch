@@ -1,20 +1,24 @@
-import { StoreEnhancer, Reducer, AnyAction, StoreCreator, applyMiddleware, Middleware } from 'redux';
+import { Reducer, AnyAction, Middleware, applyMiddleware, Store } from 'redux';
 import { Reducer as RepatchReducer } from 'repatch';
 
-const REPATCH = '@@repatch/NEXT_STATE';
+declare module 'redux' {
+  export interface Dispatch<S> {
+    (reducer: RepatchReducer<S>): S;
+  }
+}
 
-const middleware: Middleware = store => next => action => {
+const OVERRIDE = '@@repatch/OVERRIDE';
+
+export const middleware: Middleware = store => next => action => {
   if (typeof action !== 'function') return next(action);
   const result = action(store.getState());
-  return typeof result === 'function' ? next(result) : next({ type: REPATCH, nextState: result });
+  return typeof result === 'function' ? next(result) : next({ type: OVERRIDE, state: result });
 };
 
 const extendReducer = <S>(reducer: Reducer<S>): Reducer<S> => (state: S, action: AnyAction) =>
-  action.type === REPATCH ? action.nextState : reducer(state, action);
+  action.type === OVERRIDE ? action.state : reducer(state, action);
 
-const extendEnhancer = enhancer => (enhancer ? enhancer(applyMiddleware(middleware)) : applyMiddleware(middleware));
-
-export const repatch = createStore => (reducer, preloadedState, enhancer) =>
-  createStore(extendReducer(reducer), preloadedState, extendEnhancer(enhancer));
+export const repatch = createStore => (reducer, preloadedState) =>
+  applyMiddleware(middleware)(createStore)(extendReducer(reducer), preloadedState);
 
 export default repatch;

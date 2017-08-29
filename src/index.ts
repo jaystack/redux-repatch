@@ -1,4 +1,4 @@
-import { Reducer, AnyAction, Middleware, applyMiddleware, Store } from 'redux';
+import { Reducer, AnyAction, Middleware, Store, applyMiddleware } from 'redux';
 import { Reducer as RepatchReducer } from 'repatch';
 
 declare module 'redux' {

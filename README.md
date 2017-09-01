@@ -64,6 +64,8 @@ const waitAndIncrement = time => state => async (dispatch, getState) => {
 store.dispatch(waitAndIncrement(3000))
 ```
 
+**However if you would like to use with the original [redux-thunk](https://www.npmjs.com/package/redux-thunk), then you are looking for this: [redux-repatch-creator](https://www.npmjs.com/package/redux-repatch-creator).**
+
 #### Injecting extra argument
 
 ```javascript

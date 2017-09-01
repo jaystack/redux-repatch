@@ -1,6 +1,6 @@
 {
   "name": "redux-repatch",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Redux enhancer for dispatching reducers",
   "main": "lib/index",
   "browser": "dist/redux-repatch.js",

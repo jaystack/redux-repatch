@@ -64,7 +64,7 @@ const waitAndIncrement = time => state => async (dispatch, getState) => {
 store.dispatch(waitAndIncrement(3000))
 ```
 
-#### Adding extraArgument
+#### Injecting extra argument
 
 ```javascript
 import { createStore } from 'redux'

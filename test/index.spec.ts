@@ -1,54 +1,92 @@
 import 'jest';
 import * as assert from 'assert';
 import { createStore, applyMiddleware, compose, Middleware } from 'redux';
-import { REDUCER, createAction, repatch } from '../src';
+import repatch from '../src';
 
 describe('redux-repatch', () => {
-  describe('createAction', () => {
-    it('throws if reducer is not a function', () => {
-      assert.throws(() => createAction(undefined));
+  const ZERO = 'ZERO';
+  const baseReducer = (state = 0, action) => (action.type === ZERO ? 0 : state);
+  const increment = () => state => state + 1;
+  const zero = () => ({ type: ZERO });
+
+  describe('without other enhancers', () => {
+    it('runs the repatch action', () => {
+      const store = createStore(baseReducer, 5, repatch());
+      store.dispatch(increment());
+      assert.strictEqual(store.getState(), 6);
     });
 
-    it('returns a repatch action', () => {
-      const reducer = _ => _;
-      const action = createAction(reducer);
-      assert.strictEqual(action.type, REDUCER);
-      assert.strictEqual(action.reducer, reducer);
+    it('runs the redux action', () => {
+      const store = createStore(baseReducer, 5, repatch());
+      store.dispatch(zero());
+      assert.strictEqual(store.getState(), 0);
+    });
+
+    it('runs redux action via thunk action', () => {
+      const store = createStore(baseReducer, 5, repatch());
+      store.dispatch(state => dispatch => dispatch(zero()));
+      assert.strictEqual(store.getState(), 0);
+    });
+
+    it('runs repatch action via thunk action', () => {
+      const store = createStore(baseReducer, 5, repatch());
+      store.dispatch(state => dispatch => dispatch(increment()));
+      assert.strictEqual(store.getState(), 6);
     });
   });
 
-  describe('enhancer', () => {
-    const ZERO = 'ZERO';
-    const baseReducer = (state = 5, action) => (action.type === ZERO ? 0 : state);
-    const increment = () => createAction(state => state + 1);
-    const zero = () => ({ type: ZERO });
+  describe('with other enhancers', () => {
+    const middleware = store => next => action => next(action);
 
-    describe('without other enhancers', () => {
+    describe('to left', () => {
       it('runs the repatch action', () => {
-        const store = createStore(baseReducer, repatch);
+        const store = createStore(baseReducer, 5, compose(repatch() as any, applyMiddleware(middleware)));
         store.dispatch(increment());
         assert.strictEqual(store.getState(), 6);
       });
 
       it('runs the redux action', () => {
-        const store = createStore(baseReducer, repatch);
+        const store = createStore(baseReducer, 5, compose(repatch() as any, applyMiddleware(middleware)));
         store.dispatch(zero());
         assert.strictEqual(store.getState(), 0);
+      });
+
+      it('runs redux action via thunk action', () => {
+        const store = createStore(baseReducer, 5, compose(repatch() as any, applyMiddleware(middleware)));
+        store.dispatch(state => dispatch => dispatch(zero()));
+        assert.strictEqual(store.getState(), 0);
+      });
+
+      it('runs repatch action via thunk action', () => {
+        const store = createStore(baseReducer, 5, compose(repatch() as any, applyMiddleware(middleware)));
+        store.dispatch(state => dispatch => dispatch(increment()));
+        assert.strictEqual(store.getState(), 6);
       });
     });
 
-    describe('with other enhancer', () => {
-      const middleware: Middleware = store => next => action => next(action);
+    describe('to right', () => {
       it('runs the repatch action', () => {
-        const store = createStore(baseReducer, compose(applyMiddleware(middleware), repatch as any));
+        const store = createStore(baseReducer, 5, compose(applyMiddleware(middleware), repatch() as any));
         store.dispatch(increment());
         assert.strictEqual(store.getState(), 6);
       });
 
       it('runs the redux action', () => {
-        const store = createStore(baseReducer, compose(applyMiddleware(middleware), repatch as any));
+        const store = createStore(baseReducer, 5, compose(applyMiddleware(middleware), repatch() as any));
         store.dispatch(zero());
         assert.strictEqual(store.getState(), 0);
+      });
+
+      it('runs redux action via thunk action', () => {
+        const store = createStore(baseReducer, 5, compose(applyMiddleware(middleware), repatch() as any));
+        store.dispatch(state => dispatch => dispatch(zero()));
+        assert.strictEqual(store.getState(), 0);
+      });
+
+      it('runs repatch action via thunk action', () => {
+        const store = createStore(baseReducer, 5, compose(applyMiddleware(middleware), repatch() as any));
+        store.dispatch(state => dispatch => dispatch(increment()));
+        assert.strictEqual(store.getState(), 6);
       });
     });
   });

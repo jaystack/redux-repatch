@@ -16,7 +16,7 @@ npm install --save redux-repatch
 
 ```javascript
 import { createStore } from 'redux'
-import { repatch, createAction } from 'redux-repatch'
+import repatch from 'redux-repatch'
 
 const reducer = (state = 0, action) {
   switch (action.type) {
@@ -25,10 +25,10 @@ const reducer = (state = 0, action) {
   }
 }
 
-const store = createStore(reducer, repatch)
+const store = createStore(reducer, repatch())
 
 const setToValue = value => ({ type: 'SET_TO_VALUE', value }) // redux action
-const increment = value => createAction(state => state + value) // repatch action
+const increment = value => state => state + value // repatch action
 
 store.dispatch(setToValue(42)) // 42
 store.dispatch(increment(10)) // 52
@@ -38,31 +38,63 @@ store.dispatch(increment(10)) // 52
 
 ```javascript
 import { createStore, applyMiddlewares, compose } from 'redux'
-import { repatch, createAction } from 'redux-repatch'
+import repatch from 'redux-repatch'
 
 const store = createStore(
   reducer,
   compose(
     applyMiddlewares(myMiddleware),
-    repatch
+    repatch()
   )
 )
 ```
 
-### Use without `createAction` function
+### Use with [redux-thunk](https://www.npmjs.com/package/redux-thunk)
+
+We cannot use `repatch` actions and `thunk` actions together, because both of actions are defined as functions. Therefore `redux-repatch` provides a builtin `thunk` mechanism.
+The original [repatch](https://www.npmjs.com/package/repatch) library shares its own `thunk` middleware, that's using is optional. `redux-repatch` does it automatically.
+In the `repatch` terminology `thunk` reducer is a function, that returns a function. We call this function as the `delegate`.
 
 ```javascript
-import { REDUCER } from 'redux-repatch'
+const waitAndIncrement = time => state => async (dispatch, getState) => {
+  await sleep(time);
+  dispatch(increment(10))
+}
 
-const increment = value => ({
-  type: REDUCER,
-  reducer: state => state + value
-})
+store.dispatch(waitAndIncrement(3000))
+```
+
+#### Injecting extra argument
+
+```javascript
+import { createStore } from 'redux'
+import repatch from 'redux-repatch'
+import api from './api'
+import { hashHistory } from 'react-router';
+
+const store = createStore(reducer, repatch({ api, hashHistory }))
+
+const updateUser = delta => state =>
+  async (dispatch, getState, { api, hashHistory }) => {
+    // ...
+  }
 ```
 
 ## How it works
 
-The `repatch` enhancer extends your reducer by a special action type (`REDUCER`), that every repatch action contains. The `createAction` function creates a `{ type: REDUCER, reducer }` action object. When this action arrives into the reducer, the reducer considers that is a repatch action, and reduces the whole state by the given `reducer`.
+The `repatch` enhancer extends your reducer by handling a special action type, and enhances the `store` with a middleware. This middleware handles the function-like actions. The `thunk` actions will fired in the middleware and they returned value will be returned. The regular `repatch` reducers will be transformed to regular `redux` action objects with the previously mentioned special action type. Then the extended reducer can handle it.
+
+## Import in CommonJS
+
+```javascript
+const repatch = require('redux-repatch').repatch
+```
+
+or
+
+```javascript
+const repatch = require('redux-repatch').default
+```
 
 ## Bundles
 
@@ -79,7 +111,7 @@ or the minified bundle:
 then
 
 ```javascript
-const { repatch, createAction, REDUCER } = ReduxRepatch
+const repatch = ReduxRepatch.repatch
 ```
 
 ---
